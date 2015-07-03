@@ -37,4 +37,6 @@
 *.idb
 *.pdb
 *.ilk
-
+*.opensdf
+*.filters
+*.lastbuildstate
