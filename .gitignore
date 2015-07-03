@@ -26,3 +26,15 @@
 *.exe
 *.out
 *.app
+
+# Studio
+*.sln
+*.sdf
+*.suo
+*.vcxproj
+*.log
+*.tlog
+*.idb
+*.pdb
+*.ilk
+
