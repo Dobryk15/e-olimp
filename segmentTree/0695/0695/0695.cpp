@@ -63,5 +63,6 @@ int main() {
 		}
 		else if(x < 0) update(1, 1, n, y, -x);
 	}
+
 	return 0;
 }
