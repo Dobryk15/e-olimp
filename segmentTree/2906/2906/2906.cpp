@@ -6,54 +6,83 @@ using namespace std;
 typedef long long ll;
 
 struct Node {
-	ll max;
-	Node():  max(-INF){}
+	ll max_sum, pref, suf, sum;
+	Node(): max_sum(-INF), pref(0), suf(0), sum(0){}
 };
  
-const ll MaxN = 500000;
-ll n = 500000;
-ll a[MaxN];
-
-Node tree[4*MaxN];
-void build (ll v, ll l, ll r){
-	if (l == r) 
-		tree[v].max = a[l]; 
+const ll MaxN = 50000;
+ll n = 50000;
+void build (Node* tree,ll*a, ll v, ll tl, ll tr){
+	if (tl == tr) 
+		tree[v].max_sum = tree[v].max_sum = tree[v].pref = tree[v].suf = tree[v].sum = a[tl]; 
 	else {
-		ll m = (l + r) / 2;
-		build (v * 2, l, m);
-		build (v * 2 + 1, m + 1, r);
-		tree[v].max = max(tree[2*v].max, tree[2*v+1].max);
+		ll m = (tl + tr) / 2;
+		build (tree, a, v * 2, tl, m);
+		build (tree, a, v * 2 + 1, m + 1, tr);
+
+		tree[v].sum = tree[2*v].sum + tree[2*v + 1].sum;
+		tree[v].pref = max(tree[2*v].pref, tree[2*v + 1].pref + tree[2*v].sum);
+		tree[v].suf = max(tree[2*v + 1].suf, tree[2*v].suf + tree[2*v + 1].sum);
+		tree[v].max_sum = max(max(tree[2*v].max_sum, tree[2*v + 1].max_sum), tree[2*v].suf + tree[2*v + 1].pref);
 	}
 }
 
-int func (ll v, ll tl, ll tr, ll l, ll r){
-	if (l > r) return Node().max;
-	if (tl == l && tr == r) return tree[v].max;
+int func (Node* tree, ll *a, ll v, ll tl, ll tr, ll l, ll r){
+	if (l > r) 
+	{
+		return INF;
+	}
+	if (tl == l && tr == r) return tree[v].max_sum;
 
 	ll m = (tl + tr)/2;
-	tree[v*2].max =  func (2*v, tl, m, l, min(m, r));
-	tree[v*2 + 1].max = func (2*v+1, m+1, tr, max(l, m+1), r);
-	Node ans;
-	ans.max = max(tree[v*2].max, tree[v*2+1].max);
-	return ans.max;
+	tree[v*2].max_sum =  func (tree, a, 2*v, tl, m, l, min(m, r));
+	tree[v*2 + 1].max_sum = func (tree, a, 2*v+1, m+1, tr, max(l, m+1), r);
+
+		tree[v].sum = tree[2*v].sum + tree[2*v + 1].sum;
+		tree[v].pref = max(tree[2*v].pref, tree[2*v + 1].pref + tree[2*v].sum);
+		tree[v].suf = max(tree[2*v + 1].suf, tree[2*v].suf + tree[2*v + 1].sum);
+		tree[v].max_sum = max(max(tree[2*v].max_sum, tree[2*v + 1].max_sum), tree[2*v].suf + tree[2*v + 1].pref);
+	return tree[v].max_sum;
+}
+
+void update(Node* tree, ll *a, ll v, ll tl, ll tr, ll value, ll pos){
+	if (tl == tr) tree[v].max_sum = tree[v].pref = tree[v].suf = tree[v].sum = value;
+	else{
+		ll m = (tl + tr)/2;
+		if (m >= pos) update(tree, a, 2*v, tl, m, value, pos);
+		else update(tree, a, 2*v + 1, m+1, tr, value, pos);
+
+		tree[v].sum = tree[2*v].sum + tree[2*v + 1].sum;
+		tree[v].pref = max(tree[2*v].pref, tree[2*v + 1].pref + tree[2*v].sum);
+		tree[v].suf = max(tree[2*v + 1].suf, tree[2*v].suf + tree[2*v + 1].sum);
+		tree[v].max_sum = max(max(tree[2*v].max_sum, tree[2*v + 1].max_sum), tree[2*v].suf + tree[2*v + 1].pref);
+	}
 }
 
 int main() {
-	ll n_, m, x, y;
+Node tree[4*MaxN];
+ll a[MaxN];
+
+	ll n_, k, x, y;
+	int sym;
+
 	cin >> n_;
 	for (int i = 1; i <= n_; ++i)
 	{
 		cin >> a[i];
 	}
-	
-	build(1, 1, n);
-	cin >> m;
-	while (m--){
-		cin >> x >> y;
+
+	cin >> k;
+	build(tree,a,1, 1, n);
+
+	while (k--){
+		cin >> sym >> x >> y;
+		if(sym == 1){ 
 			Node t;
-			t.max = func(1, 1, n, x, y);
-			cout << t.max << endl;
+			t.max_sum = func(tree, a, 1, 1, n, x, y);
+			cout << t.max_sum << endl;
+		}
+		else if(sym == 0) update(tree, a, 1, 1, n, y, x);
 	}
-	system ("pause");
 	return 0;
 }
