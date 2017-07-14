@@ -2,4 +2,4 @@
 
 Solutions of algorithm problems released with c++
 
-Name of file is the number of the corresponding file
+Name of the file is a number of the corresponding file
